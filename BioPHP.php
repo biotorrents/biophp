@@ -6,7 +6,7 @@ declare(strict_types = 1);
  *
  * @category BioInformatics
  * @package  BioPHP
- * @author   Kenny Pavan  <kenpavan@gmail.com>
+ * @author   Kenny Pavan <kenpavan@gmail.com>
  * @license  MIT
  */
 
@@ -109,7 +109,7 @@ class BioPHP
 
         for ($i=0; $i < $longestSequenceLength; $i++) {
             if (isset($sequenceA[$i]) && isset($sequenceB[$i])) {
-                if ($sequenceA[$i] != $sequenceB[$i]) {
+                if ($sequenceA[$i] !== $sequenceB[$i]) {
                     $totalMutations++;
                 }
             } else {
@@ -157,7 +157,7 @@ class BioPHP
         $results = [];
 
         for ($i=0; $i<=$sLen; $i++) {
-            if (substr($sequenceB, $i, $tLen) == $sequenceA) {
+            if (substr($sequenceB, $i, $tLen) === $sequenceA) {
                 $results[] = $i+1;
             }
         }
@@ -245,13 +245,13 @@ class BioPHP
                     $countNucleotides[$i]['C'] = 0;
                 }
 
-                if ($sequence[$i] == 'A') {
+                if ($sequence[$i] === 'A') {
                     $countNucleotides[$i]['A']++;
-                } elseif ($sequence[$i] == 'T') {
+                } elseif ($sequence[$i] === 'T') {
                     $countNucleotides[$i]['T']++;
-                } elseif ($sequence[$i] == 'G') {
+                } elseif ($sequence[$i] === 'G') {
                     $countNucleotides[$i]['G']++;
-                } elseif ($sequence[$i] == 'C') {
+                } elseif ($sequence[$i] === 'C') {
                     $countNucleotides[$i]['C']++;
                 }
             }
@@ -273,7 +273,7 @@ class BioPHP
     public function getUniprotFastaByID($uniprotID)
     {
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "http://www.uniprot.org/uniprot/$uniprotID.fasta");
+        curl_setopt($ch, CURLOPT_URL, "https://www.uniprot.org//uniprot/$uniprotID.fasta");
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
@@ -284,8 +284,9 @@ class BioPHP
 
     /**
      * varyingFormsGeneration
+	 * 
+	 * Create and array of all matchable amino acids at each position.
      */
-    //create and array of all matchable amino acids at each position.
     public function varyingFormsGeneration($varyingSubSequence)
     {
         $varyingSubSequence = str_split($varyingSubSequence);
@@ -296,20 +297,20 @@ class BioPHP
         $inc=0;
 
         for ($i=0; $i < count($varyingSubSequence); $i++) {
-            if ($varyingSubSequence[$i] == ']') {
+            if ($varyingSubSequence[$i] === ']') {
                 $squareBrace = false;
-            } elseif ($varyingSubSequence[$i] == '[' || $squareBrace == true) {
-                if ($squareBrace == true) {
+            } elseif ($varyingSubSequence[$i] === '[' || $squareBrace === true) {
+                if ($squareBrace === true) {
                     $returnedVaryingSubSequence[$inc][] = $varyingSubSequence[$i];
                 }
 
                 $squareBrace = true;
 
                 continue;
-            } elseif ($varyingSubSequence[$i] == '}') {
+            } elseif ($varyingSubSequence[$i] === '}') {
                 $curlyBrace = false;
-            } elseif ($varyingSubSequence[$i] == '{'  || $curlyBrace == true) {
-                if ($curlyBrace == true) {
+            } elseif ($varyingSubSequence[$i] === '{'  || $curlyBrace === true) {
+                if ($curlyBrace === true) {
                     $returnedVaryingSubSequence[$inc][] = '!'.$varyingSubSequence[$i];
                 }
 
@@ -353,23 +354,23 @@ class BioPHP
             for ($b=0; $b<$tLen; $b++) {
                 if (is_array($varyingSubSequences[$b])) {
                     foreach ($varyingSubSequences[$b] as $singleValue) {
-                        if ($singleValue[0] == '!') {
-                            if ($singleValue[1] != $sequence[$i+$b]) {
+                        if ($singleValue[0] === '!') {
+                            if ($singleValue[1] !== $sequence[$i+$b]) {
                                 $matches++;
                             }
                         } else {
-                            if ($singleValue == $sequence[$i+$b]) {
+                            if ($singleValue === $sequence[$i+$b]) {
                                 $matches++;
                             }
                         }
                     }
                 } else {
-                    if ($varyingSubSequences[$b] == $sequence[$i+$b]) {
+                    if ($varyingSubSequences[$b] === $sequence[$i+$b]) {
                         $matches++;
                     }
                 }
 
-                if ($matches == $tLen) {
+                if ($matches === $tLen) {
                     $results[] = ($i+1);
                 }
             }
@@ -406,7 +407,7 @@ class BioPHP
                     continue 2;
                 }
 
-                if ($motifsShared == $sequenceCount) {
+                if ($motifsShared === $sequenceCount) {
                     return $motifsPossiblity;
                 }
             }
@@ -423,9 +424,9 @@ class BioPHP
 
         for ($i=0; $i<strlen($sequence);$i++) {
             $newORF = '';
-            if ($sequence[$i] == 'M') {
+            if ($sequence[$i] === 'M') {
                 for ($j=$i; $j<strlen($sequence);$j++) {
-                    if ($sequence[$j] != '*') {
+                    if ($sequence[$j] !== '*') {
                         $newORF .= $sequence[$j];
                     } else {
                         $orfProteins[] = $newORF;
@@ -487,7 +488,7 @@ class BioPHP
                 $sequence1 = substr($sequence, $i, $j);
                 $sequence2 = $this->complementDnaSequence($this->reverseSequence($sequence1, $i, $j));
 
-                if ($sequence1 == $sequence2) {
+                if ($sequence1 === $sequence2) {
                     $results[] = [$i+1 => $j];
                 }
             }
