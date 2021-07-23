@@ -6,8 +6,8 @@ BioPHP is an easy to use open source project. BioPHP implements a selection of s
 ### Find Reverse Complement
 ```php
 $BioPHP = new BioPHP();
-$result = $BioPHP->reverseSequence('ATGAAAGCATC');
-$result = $BioPHP->complementDnaSequence($result);
+$result = $BioPHP->reverse('ATGAAAGCATC');
+$result = $BioPHP->complement($result);
 //prints TTTCAT
 ```
 

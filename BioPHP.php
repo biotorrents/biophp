@@ -10,83 +10,129 @@ declare(strict_types = 1);
  * @license  MIT
  */
 
+ # Required for inferringMRnaFromProteinCount
 #require_once __DIR__.'/vendor/autoload.php';
 
 class BioPHP
 {
     /**
-     * normalizeSequence
+     * normalize
      */
-    public function normalizeSequence($sequence)
+    public function normalize($sequence)
     {
-        return strtoupper($sequence);
+        # Make uppercase first
+        $sequence = strtoupper($sequence);
+
+        # Validate the sequence alphabet used
+        # Proteins are a superset of DNA/RNA
+        $ProteinRegex = '/[ACDEFGHIKLMNPQRSTVWYUO*BXZ]/';
+        #$sequenceRegex = '/[ATUGCYRSWKMBDHVNZ]/';
+
+        if (!preg_match($ProteinRegex, $sequence)) {
+            throw new Exception("Only letters ACDEFGHIKLMNPQRSTVWYUO*BXZ are allowed for sequences. Got $Letter.");
+        } else {
+            return $sequence;
+        }
+    }
+                
+    
+    /**
+     * complement
+     *
+     * Takes the complement of a sequence.
+     * Doesn't validate the sequence alphabet.
+     */
+    public function complement(string $sequence)
+    {
+        $sequence = $this->normalize($sequence);
+
+        /**
+         * Provides 1:1 mapping between bases and their complements.
+         * Kind of ghetto, but lowercase replaces help stop extra flips.
+         * @see https://github.com/TimothyStiles/poly/blob/prime/sequence.go
+         */
+        $RuneMap = [
+            'A' => 't',
+            'B' => 'v',
+            'C' => 'g',
+            'D' => 'h',
+            'G' => 'c',
+            'H' => 'd',
+            'K' => 'm',
+            'M' => 'k',
+            'N' => 'n',
+            'R' => 'y',
+            'S' => 's',
+            'T' => 'a',
+            'U' => 'a',
+            'V' => 'b',
+            'W' => 'w',
+            'Y' => 'r',
+        ];
+
+        return strtoupper(
+            str_replace(
+                array_keys($RuneMap),
+                array_values($RuneMap),
+                $sequence
+            )
+        );
     }
 
 
     /**
-     * reverseSequence
+     * reverseComplement
+     *
+     * Takes the reverse complement of a sequence.
      */
-    public function reverseSequence($sequence)
+
+    public function reverseComplement(string $sequence)
     {
-        $sequence = $this->normalizeSequence($sequence);
-        return strrev($sequence);
-    }
-
-
-    /**
-     * complementDnaSequence
-     */
-    public function complementDnaSequence($sequence)
-    {
-        $sequence = $this->normalizeSequence($sequence);
-        $sequence = str_replace('A', 't', $sequence);
-        $sequence = str_replace('T', 'a', $sequence);
-        $sequence = str_replace('G', 'c', $sequence);
-        $sequence = str_replace('C', 'g', $sequence);
-        $sequence = $this->normalizeSequence($sequence);
-        return $sequence;
-    }
-
-
-    /**
-     * countNucleotides
-     */
-    public function countNucleotides($sequence)
-    {
-        return strlen($sequence);
+        return strrev($this->complement($sequence));
     }
 
 
     /**
      * gcContent
+     *
+     * Calculate GC content of a DNA sequence.
      */
-    public function gcContent($sequence, $precision = 2)
+    public function gcContent(string $sequence, int $Precision = 2)
     {
-        $sequence = $this->normalizeSequence($sequence);
-        $g = substr_count($sequence, 'G');
-        $c = substr_count($sequence, 'C');
-        return number_format((($g+$c) / strlen($sequence)) * 100, $precision);
+        $sequence = $this->normalize($sequence);
+        
+        $G = substr_count($sequence, 'G');
+        $C = substr_count($sequence, 'C');
+
+        return number_format((($G + $C) / strlen($sequence)) * 100, $Precision);
     }
 
 
     /**
-     * convertRnaToDna
+     * convert
+     *
+     * @param string $Alphabet 'DNA|RNA'
+     * The alphabet you want to convert FROM.
      */
-    public function convertRnaToDna($sequence)
+    public function convert($sequence, $Alphabet)
     {
-        $sequence = $this->normalizeSequence($sequence);
-        $sequence = str_replace('U', 'T', $sequence);
-        return $sequence;
-    }
+        $sequence = $this->normalize($sequence);
 
-
-    /**
-     * convertDnaToRna
-     */
-    public function convertDnaToRna($sequence)
-    {
-        $sequence = $this->normalizeSequence($sequence);
-        $sequence = str_replace('T', 'U', $sequence);
+        switch (strtoupper($Alphabet)) {
+            # From DNA to RNA: T => U
+            case 'DNA':
+                $sequence = str_replace('T', 'U', $sequence);
+                break;
+                
+            # From RNA to DNA: U => T
+            case 'RNA':
+                $sequence = str_replace('U', 'T', $sequence);
+                break;
+                
+            default:
+                throw new Exception("Expected 'DNA|RNA' for \$Alphabet, got $Alphabet.");
+                break;
+        }
         return $sequence;
     }
 
@@ -96,8 +142,8 @@ class BioPHP
      */
     public function countPointMutations($sequenceA, $sequenceB)
     {
-        $sequenceA = $this->normalizeSequence($sequenceA);
-        $sequenceB = $this->normalizeSequence($sequenceB);
+        $sequenceA = $this->normalize($sequenceA);
+        $sequenceB = $this->normalize($sequenceB);
 
         $totalMutations = 0;
 
@@ -126,7 +172,7 @@ class BioPHP
      */
     public function translateDna($sequence, $offset = 0)
     {
-        $sequence = $this->normalizeSequence($sequence);
+        $sequence = $this->normalize($sequence);
         $sequence = substr($sequence, $offset);  // offset reading frame for future use
         $sequenceCodons = str_split($sequence, 3);
         $proteinSequence = '';
@@ -150,8 +196,8 @@ class BioPHP
      */
     public function findMotifDNA($sequenceA, $sequenceB)
     {
-        $sequenceA = $this->normalizeSequence($sequenceA);
-        $sequenceB = $this->normalizeSequence($sequenceB);
+        $sequenceA = $this->normalize($sequenceA);
+        $sequenceB = $this->normalize($sequenceB);
         $tLen = strlen($sequenceA);
         $sLen = strlen($sequenceB);
         $results = [];
@@ -171,7 +217,7 @@ class BioPHP
      */
     public function getReadingFrames($sequence)
     {
-        $sequence = $this->normalizeSequence($sequence);
+        $sequence = $this->normalize($sequence);
         $frameOne = $sequence;
         $frameTwo = substr($sequence, 1);
         $frameThree = substr($sequence, 2);
@@ -185,7 +231,7 @@ class BioPHP
      */
     public function calcMonoIsotopicMass($proteinSequence)
     {
-        $proteinSequence = $this->normalizeSequence($proteinSequence);
+        $proteinSequence = $this->normalize($proteinSequence);
         $proteinLen = strlen($proteinSequence);
         $mass = 0;
 
@@ -284,8 +330,8 @@ class BioPHP
 
     /**
      * varyingFormsGeneration
-	 * 
-	 * Create and array of all matchable amino acids at each position.
+     *
+     * Create and array of all matchable amino acids at each position.
      */
     public function varyingFormsGeneration($varyingSubSequence)
     {
@@ -448,8 +494,8 @@ class BioPHP
         $fastaArray = $this->readFasta($sequence);
         $sequence = $fastaArray[0]['sequence'];
         $frames = $this->getReadingFrames($sequence);
-        $rframes = $this->reverseSequence($sequence);
-        $rframes = $this->complementDnaSequence($rframes);
+        $rframes = strrev($sequence);
+        $rframes = $this->complement($rframes);
         $rframes = $this->getReadingFrames($rframes);
         $results = [];
 
@@ -472,11 +518,12 @@ class BioPHP
 
 
     /**
+     * namespace Clone
      * findRestrictionSites
      */
     public function findRestrictionSites($sequence, $rangeStart, $rangeEnd)
     {
-        $rcSequence = $this->complementDnaSequence($sequence);
+        $rcSequence = $this->complement($sequence);
         $results = [];
 
         for ($i=0; $i<strlen($sequence)-($rangeStart-1); $i++) {
@@ -486,7 +533,7 @@ class BioPHP
                 }
 
                 $sequence1 = substr($sequence, $i, $j);
-                $sequence2 = $this->complementDnaSequence($this->reverseSequence($sequence1, $i, $j));
+                $sequence2 = $this->complement(strrev($sequence1, $i, $j));
 
                 if ($sequence1 === $sequence2) {
                     $results[] = [$i+1 => $j];
