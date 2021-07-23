@@ -1,9 +1,16 @@
 # BioPHP - PHP Bioinformatics class
-BioPHP is an easy to use open source project. BioPHP implements a selection of simple tools for manipulating genomic data. PHP 7 has benchmarked much faster than Python, this class aims to build tools for basic RNA, DNA, and Protein manipulation. Future plans include creating an experimental de novo assembly tool, and online project portal. 
 
-## Simple Usage:
+BioPHP implements a selection of simple tools for manipulating genomic data.
+It aims to build tools for basic RNA, DNA, and protein manipulation.
+BioTorrents.de's fork is designed for
+[biotorrents/gazelle](https://github.com/biotorrents/gazelle)
+and is heavily inspired by
+[TimothyStiles/poly](https://github.com/TimothyStiles/poly).
 
-### Find Reverse Complement
+# Simple Usage (to be revised)
+
+## Find Reverse Complement
+
 ```php
 $BioPHP = new BioPHP();
 $result = $BioPHP->reverse('ATGAAAGCATC');
@@ -11,28 +18,32 @@ $result = $BioPHP->complement($result);
 //prints TTTCAT
 ```
 
-### Calculate GC Content
+## Calculate GC Content
+
 ```php
 $BioPHP = new BioPHP();
 echo $BioPHP->gcContent('ATGAAAGCATC', 4)."\n";
 //prints 36.3636
 ```
 
-### Count Point Mutations Between Two Sequences
+## Count Point Mutations Between Two Sequences
+
 ```php
 $BioPHP = new BioPHP();
 echo $BioPHP->countPointMutations('CTGATGATGGGAGGAAATTTCA','CTGATGATGCGAGGGAATATCG')."\n";
 //prints 4
 ```
 
-### Translate DNA Sequence to Amino Acid Sequence
+## Translate DNA Sequence to Amino Acid Sequence
+
 ```php
 $BioPHP = new BioPHP();
 echo $BioPHP->translateDna('CTGATGATGGGAGGAAATTTCAGA')."\n";
 //prints LMMGGNFR
 ```
 
-### Calculate Monoisotopic Mass
+## Calculate Monoisotopic Mass
+
 ```php
 $BioPHP = new BioPHP();
 $proteinSequence = $BioPHP->translateDna('CTGATGATGGGAGGAAATTTCAGA')."\n";
@@ -40,14 +51,16 @@ echo $BioPHP->calcMonoIsotopicMass($proteinSequence)."\n\n";
 //prints 906.42041
 ```
 
-### Finding a Motif in DNA
+## Finding a Motif in DNA
+
 ```php
 $BioPHP = new BioPHP();
 echo $BioPHP->findMotifDNA('ATAT', 'GTATATCTATATGGCCATAT')."\n";
 //prints 3 9 17
 ```
 
-### Get Reading Frames
+## Get Reading Frames
+
 ```php
 $BioPHP = new BioPHP();
 print_r( $BioPHP->getReadingFrames('GTATATCTATATGGCCATAT') );
@@ -65,8 +78,8 @@ Array
 //Protip: To get all 6 reading frames. Use the reverse and complement methods, then pass the result to getReadingFrames()
 ```
 
+## Find most common likely ancestor
 
-### Find most common likely ancestor
 ```php
 $fastaSequence = "
 >Sequence 1
@@ -84,8 +97,8 @@ echo $BioPHP->mostLikelyCommonAncestor($fastaArray)."\n";
 //prints ATGCAACT
 ```
 
+## Get a fasta result from Uniprot and calculate isotpoic mass
 
-### Get a fasta result from Uniprot and calculate isotpoic mass
 ```php
 $BioPHP = new BioPHP();
 $uniprotFasta =  $BioPHP->getUniprotFastaByID("B5ZC00"); //returns the result from Uniprot as a string
@@ -95,8 +108,8 @@ echo $BioPHP->calcMonoIsotopicMass($fastaArray[0]['sequence'])."\n";
 //prints 55319.0636
 ```
 
+## Find protein motif using a variable "shorthand" motif search
 
-### Find protein motif using a variable "shorthand" motif search
 ```php
 $BioPHP = new BioPHP();
 $results = $BioPHP->findMotifProtein("N{P}[ST]{P}","B5ZC00");
@@ -117,10 +130,11 @@ Array
 //Notes: The second parameter expects a protein access ID string used to lookup the full sequence via UniProt.
 ```
 
+## Finding a shared motif
 
-### Finding a shared motif
 This task can be very CPU intensive. Using PHP 7, this method benchmarked faster than Python! Runtime results were about 1 second with
 a collection of 100 DNA strings of length 1 kbp each.
+
 ```php
 $fasta="
 >Sequence 1
@@ -138,11 +152,10 @@ echo $result."\n";
 
 ```
 
-
-### Find open reading frames from DNA sequnce
+## Find open reading frames from DNA sequnce
 
 ```php
-$sequence = ">Test DNA Sequence
+$Sequence = ">Test DNA Sequence
 TCCCCGGACTCCAAACGCTCGGTAGCCGCCCCTGCTCGACATATTTAGCTCCCTGCATTG
 ACGCCCTGGCAGCCCCGATCAATTTTCGTGGTTAAACGCGCGCTCGCAAGGGACATCGAC
 CGGACCACAGAGCATAGCATGCCTTAGGATCGCCTGTCACTGTTCGTCTCCCTATTTGAG
@@ -150,7 +163,7 @@ CACTGTAGCCCCTGGTACCCCCGTCCTGAAGCGTGTGTGATACACGGTCTGCCCAAGATG
 ";
 
 $BioPHP = new BioPHP();
-$results = $BioPHP->printORFProteins($sequence);
+$results = $BioPHP->printORFProteins($Sequence);
 print_r($results);
 
 /*
@@ -166,17 +179,18 @@ Array
 */
 ```
 
+## Locating restriction sites between length of 4 and 12
 
-### Locating restriction sites between length of 4 and 12
 ```php
 $BioPHP = new BioPHP();
 $results = $BioPHP->findRestrictionSites("TCAATGCATGCGGGTCTATATGCAT", 4, 12);
 //returns an array containing postion and length of restrictions
 ```
 
+## Inferring mRNA from Protein - calculates total different RNA strings from which the protein can be translated
 
-### Inferring mRNA from Protein - calculates total different RNA strings from which the protein can be translated
-#### Note: This method requires the use of the PHP Math Big Integer package which is a composer dependency of this project.
+### Note: This method requires the use of the PHP Math Big Integer package which is a composer dependency of this project.
+
 ```php
 $BioPHP = new BioPHP();
 $result = $BioPHP->inferringMRnaFromProteinCount("MTIFMFHNKNICTEYMGYYDQQIMQTEHKWYWDFHTFMIPNVFYEDVIKFKMRMLMIPNCFFGPWLFCKLEKCQYYEKATEPAPIVKDYTLFATGGAGREATFWPWFWTDENRPKDYYFQRDGLHHRNEPRLPHATCRRAYYQCEMIQYAIVTSCVLLAWKMFTDYGHTGVASEPKEPQEDIKCMKFPHMSWQKTLTEAFYELFPCYPEEFPNDRPWLLGHGFGPIVCTITAIDTTDVAKNIWKAVFRPHAGNWDIGFHSPCASEGCPDIMFPYFTCHDYKGMMCCFNLTMEVCCKQPRPTGIYMMVERMRIMNNREFAGFKHYREEHIKHYWRFGIFASPFVICWSPKTKGPPTSDWYMRDSEVVTQESELKESWQDMMEQHSMFGIPHCEKERWMNDNWKCKLFYYEVILWISNCECDQHVNCCVAHDPGTQVDWAWTLDMWWDQKYFGFFVRKKGQKYNMHWGAPYWLTNPTEKKDFIQHEQLGPLQTFRHCSSPAPT");
