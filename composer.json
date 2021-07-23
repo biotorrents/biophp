@@ -15,7 +15,9 @@
     }
   ],
   "require": {
+    "php": ">=7.4",
     "ext-blake3": "*",
+    "ext-curl": "*",
     "pear/math_biginteger": "^1.0.3"
   },
   "require-dev": {
